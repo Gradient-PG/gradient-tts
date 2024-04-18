@@ -14,6 +14,7 @@ from lhotse.dataset import (
 )
 from lhotse.dataset.input_strategies import OnTheFlyFeatures
 from torch.utils.data import DataLoader
+from lhotse import Fbank
 
 
 transforms = [
@@ -21,51 +22,52 @@ transforms = [
 ]
 
 
-def train_dataloader(path, batch_size):
+def train_dataloader(path):
+    cuts = train_cuts(path)
     sampler = DynamicBucketingSampler(
-        train_cuts(path),
-        max_duration=100.0,
+        cuts,
         shuffle=True,
-        num_buckets=20
+        max_duration=100.0,
+        num_buckets=10,
     )
 
     ds = SpeechSynthesisDataset(
         cut_transforms=transforms,
-        feature_input_strategy=OnTheFlyFeatures("TODO")
+        feature_input_strategy=OnTheFlyFeatures(Fbank())
     )
 
     dl = DataLoader(
         ds,
         sampler=sampler,
-        batch_size=batch_size
+        batch_size=None
     )
 
     return dl
     
 
-def test_dataloader(path, batch_size):
+def test_dataloader(path):
     sampler = DynamicBucketingSampler(
         test_cuts(path),
+        shuffle=True,
         max_duration=100.0,
-        shuffle=False,
-        num_buckets=20
+        num_buckets=10,
     )
 
     ds = SpeechSynthesisDataset(
         cut_transforms=transforms,
-        feature_input_strategy=OnTheFlyFeatures("TODO")
+        feature_input_strategy=OnTheFlyFeatures(Fbank())
     )
 
     dl = DataLoader(
         ds,
         sampler=sampler,
-        batch_size=batch_size
+        batch_size=None
     )
 
     return dl
 
 
 if __name__ == "__main__":
-    dl_train, dl_test = train_dataloader("data/prepared", 5), test_dataloader("data/prepared", 5)
-    # TODO: token collater
+    dl_train, dl_test = train_dataloader("data/prepared"), test_dataloader("data/prepared")
+    # TODO: tokenizer & token collater
     print(next(iter(dl_train)))

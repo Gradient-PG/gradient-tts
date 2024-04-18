@@ -11,11 +11,22 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+also [espeak](https://aur.archlinux.org/packages/espeak)
+
 ## Prepare dataset
+extract common voice to any directory, then fix it (lhotse bug)
+```
+./dataset/fix_common_voice.sh
+```
 set args in [common_voice.py](tts/dataset/common_voice.py), then
 ```
 python3 tts/dataset/common_voice.py
 ```
+afterwards run
+```
+python3 tts/dataset/phonemes.py
+```
+TODO: actually another script might do for these steps
 
 ## Result
 TODO
