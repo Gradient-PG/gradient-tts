@@ -9,12 +9,12 @@ prepares common voice dataloaders
 from tts.dataset.common_voice import train_cuts, test_cuts
 from lhotse.dataset import (
     CutConcatenate,
-    DynamicBucketingSampler,
-    SpeechSynthesisDataset
+    DynamicBucketingSampler
 )
 from lhotse.dataset.input_strategies import OnTheFlyFeatures
 from torch.utils.data import DataLoader
-from lhotse import Fbank
+
+from dataset import TTSDataset
 
 
 transforms = [
@@ -31,10 +31,7 @@ def train_dataloader(path):
         num_buckets=10,
     )
 
-    ds = SpeechSynthesisDataset(
-        cut_transforms=transforms,
-        feature_input_strategy=OnTheFlyFeatures(Fbank())
-    )
+    ds = TTSDataset()
 
     dl = DataLoader(
         ds,
@@ -53,10 +50,7 @@ def test_dataloader(path):
         num_buckets=10,
     )
 
-    ds = SpeechSynthesisDataset(
-        cut_transforms=transforms,
-        feature_input_strategy=OnTheFlyFeatures(Fbank())
-    )
+    ds = TTSDataset()
 
     dl = DataLoader(
         ds,
@@ -68,6 +62,8 @@ def test_dataloader(path):
 
 
 if __name__ == "__main__":
+   
     dl_train, dl_test = train_dataloader("data/prepared"), test_dataloader("data/prepared")
-    # TODO: tokenizer & token collater
-    print(next(iter(dl_train)))
+    # TODO: token collater & audio codec encoder
+    batch = next(iter(dl_train))
+    print(batch)

@@ -5,7 +5,6 @@
 from pathlib import Path
 from typing import List, Tuple
 
-import k2
 import numpy as np
 import torch
 

@@ -12,7 +12,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 also [espeak](https://aur.archlinux.org/packages/espeak)
-
+also [k2 for cuda](https://k2-fsa.github.io/k2/installation/pre-compiled-cuda-wheels-linux/2.2.2.html)
 ## Prepare dataset
 extract common voice to any directory, then fix it (lhotse bug)
 ```
@@ -22,11 +22,6 @@ set args in [common_voice.py](tts/dataset/common_voice.py), then
 ```
 python3 tts/dataset/common_voice.py
 ```
-afterwards run
-```
-python3 tts/dataset/phonemes.py
-```
-TODO: actually another script might do for these steps
 
 ## Result
 TODO

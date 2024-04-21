@@ -15,11 +15,7 @@ from phonemizer.backend import EspeakBackend
 from phonemizer.backend.espeak.language_switch import LanguageSwitch
 from phonemizer.backend.espeak.words_mismatch import WordMismatch
 from phonemizer.punctuation import Punctuation
-from common_voice import train_cuts, test_cuts
 from lhotse import SupervisionSet
-
-
-PHONEMIZATION_DATASET_OUTPUT_DIR="data/phonemized"
 
 
 class TextPhonemizer(EspeakBackend):
@@ -44,21 +40,3 @@ class TextPhonemizer(EspeakBackend):
         return self.phonemize(
             [text.strip()], strip=True
         )[0]
-
-
-def main():
-    __prepare("data/prepared", "train")
-    __prepare("data/prepared", "test")
-
-
-def __prepare(manifest_dir, t):
-    supervisions = SupervisionSet.from_jsonl(f"{manifest_dir}/cv-pl_supervisions_{t}.jsonl.gz")
-
-    pho = TextPhonemizer()
-    for supervision in supervisions:
-        supervision.custom["phonemes"] = {"text": pho(supervision.text)}
-    supervisions.to_file(f"{PHONEMIZATION_DATASET_OUTPUT_DIR}/cv-pl_supervisions_{t}.jsonl_gz")
-
-
-if __name__ == "__main__":
-    main()
