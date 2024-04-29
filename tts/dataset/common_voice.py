@@ -14,8 +14,8 @@ from lhotse.recipes.commonvoice import prepare_commonvoice
 from lhotse.dataset.speech_synthesis import SpeechSynthesisDataset
 from lhotse import CutSet, SupervisionSet, RecordingSet
 
-from phonemes import TextPhonemizer
-from dataset import TOKEN_PATH
+from tts.dataset.phonemes import TextPhonemizer
+from tts.dataset.dataset import TOKEN_PATH
 
 
 DATA_DIR = "data/cv-corpus-17.0-2024-03-15-pl/cv-corpus-17.0-2024-03-15"
@@ -40,10 +40,10 @@ def main():
     )
     phonemes_train = __prepare(OUTPUT_DIR, "train")
     phonemes_test = __prepare(OUTPUT_DIR, "test")
-    train, test = train_cuts(OUTPUT_DIR), test_cuts(OUTPUT_DIR)
+    phonemes_val = __prepare(OUTPUT_DIR, "dev")
 
     with open(TOKEN_PATH, 'w') as f:
-        f.write(json.dumps(list(phonemes_train | phonemes_test)))
+        f.write(json.dumps(list(phonemes_train | phonemes_test | phonemes_val)))
 
 
 def train_cuts(manifest_dir, lang="pl"):
@@ -54,7 +54,14 @@ def test_cuts(manifest_dir, lang="pl"):
     return __get_dataset(manifest_dir, "test", lang)
 
 
+def val_cuts(manifest_dir, lang="pl"):
+    return __get_dataset(manifest_dir, "dev", lang)
+
+
 def __prepare(manifest_dir, t, lang="pl"):
+    '''
+    performs text phonemization and adds it to the common voice dataset
+    '''
     supervisions = SupervisionSet.from_jsonl(f"{manifest_dir}/cv-{lang}_supervisions_{t}.jsonl.gz")
     pho = TextPhonemizer()
     tokens = set()

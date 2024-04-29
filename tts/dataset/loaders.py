@@ -5,8 +5,6 @@ prepares common voice dataloaders
 @Links: 
     https://github.com/lifeiteng/vall-e/blob/6dc715a6213864409a94c7ed4a21134eed476b9f/valle/data/datamodule.py
 """
-
-from tts.dataset.common_voice import train_cuts, test_cuts
 from lhotse.dataset import (
     CutConcatenate,
     DynamicBucketingSampler
@@ -14,38 +12,34 @@ from lhotse.dataset import (
 from lhotse.dataset.input_strategies import OnTheFlyFeatures
 from torch.utils.data import DataLoader
 
-from dataset import TTSDataset
+from tts.dataset.common_voice import train_cuts, test_cuts, val_cuts
+from tts.dataset.dataset import TTSDataset
 
 
-transforms = [
-    CutConcatenate(duration_factor=1.0, gap=0.1)
-]
+def loaders():
+    return {
+        "train": __train_dataloader(),
+        "test": __test_dataloader(),
+        "val": __val_dataloader()
+    }
 
 
-def train_dataloader(path):
-    cuts = train_cuts(path)
-    sampler = DynamicBucketingSampler(
-        cuts,
-        shuffle=True,
-        max_duration=100.0,
-        num_buckets=10,
-    )
-
-    ds = TTSDataset()
-
-    dl = DataLoader(
-        ds,
-        sampler=sampler,
-        batch_size=None
-    )
-
-    return dl
+def __train_dataloader(path="data/prepared"):
+    return __make_loader(train_cuts(path), True)
     
 
-def test_dataloader(path):
+def __test_dataloader(path="data/prepared"):
+    return __make_loader(test_cuts(path), False)
+
+
+def __val_dataloader(path="data/prepared"):
+    return __make_loader(val_cuts(path), False)
+
+
+def __make_loader(cuts, shuffle):
     sampler = DynamicBucketingSampler(
-        test_cuts(path),
-        shuffle=True,
+        cuts,
+        shuffle=shuffle,
         max_duration=100.0,
         num_buckets=10,
     )
@@ -59,11 +53,3 @@ def test_dataloader(path):
     )
 
     return dl
-
-
-if __name__ == "__main__":
-   
-    dl_train, dl_test = train_dataloader("data/prepared"), test_dataloader("data/prepared")
-    # TODO: token collater & audio codec encoder
-    batch = next(iter(dl_train))
-    print(batch)
